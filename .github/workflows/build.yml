@@ -1,0 +1,35 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build
+        run: dotnet build Assignment.sln --nologo
+
+      - name: Run and verify game output
+        run: |
+          dotnet run --project src/Assignment.App --no-build > output.txt
+          grep -q "Merlin equipped Staff of Fire" output.txt
+          grep -q "Merlin attacks Arthur for 15 damage!" output.txt
+          grep -q "Arthur attacks Merlin for 13 damage!" output.txt
+          grep -q "Merlin heals for 15 HP. Current HP: 70/70" output.txt
+          grep -q "Merlin uses special ability" output.txt
