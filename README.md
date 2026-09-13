@@ -1,16 +1,16 @@
-# GameSystem — рефакторинг ігрової підсистеми
+# GameSystem - рефакторинг ігрової підсистеми
 
 Навчальний проєкт: ігрова бойова система на C# (.NET 8), розділена на модулі,
-класи — за єдиною відповідальністю (SRP), стан захищено модифікаторами доступу.
+класи - за єдиною відповідальністю (SRP), стан захищено модифікаторами доступу.
 
 ## Структура
 
 ```
 Assignment.slnx
-src/GameSystem/      — бібліотека: Game, Character, Equipment, Inventory,
+src/GameSystem/      - бібліотека: Game, Character, Equipment, Inventory,
                        CombatResolver, IAbility/Ability, IGameLogger/ConsoleGameLogger
-src/Assignment.App/  — консольний застосунок (точка входу через Game)
-docs/                — діаграма класів (.puml + .png) і звіт (.docx)
+src/Assignment.App/  - консольний застосунок (точка входу через Game)
+docs/                - діаграма класів (.puml + .png) і звіт (.docx)
 ```
 
 ## Як зібрати і запустити
@@ -39,11 +39,11 @@ Merlin uses special ability: [Fireball] on Arthur!
 
 ## Ключові рішення
 
-* `Game` — менеджер гри: ростер персонажів, усі ходи, весь вивід, демо-сценарій.
-* `Character` — тільки стан і дії, без `Console`; інвентар делегує `Inventory`,
-  формули шкоди — `CombatResolver`, здібності — `IAbility`.
-* `TakeDamage` — `internal`: доступний здібностям у межах збірки, закритий для зовнішнього коду.
-* `Ability` — здібності як об'єкти замість рядків (Open/Closed: нові здібності = нові класи).
+* `Game` - менеджер гри: ростер персонажів, усі ходи, весь вивід, демо-сценарій.
+* `Character` - тільки стан і дії, без `Console`; інвентар делегує `Inventory`,
+  формули шкоди - `CombatResolver`, здібності - `IAbility`.
+* `TakeDamage` - `internal`: доступний здібностям у межах збірки, закритий для зовнішнього коду.
+* `Ability` - здібності як об'єкти замість рядків (Open/Closed: нові здібності = нові класи).
 
 ## Діаграма класів
 
