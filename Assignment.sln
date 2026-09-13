@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameSystem", "src\GameSystem\GameSystem.csproj", "{06CDF594-E69F-498D-B776-068F9107A398}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Assignment.App", "src\Assignment.App\Assignment.App.csproj", "{68A5A4FD-5809-47A5-A16A-257C130C5A0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06CDF594-E69F-498D-B776-068F9107A398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06CDF594-E69F-498D-B776-068F9107A398}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06CDF594-E69F-498D-B776-068F9107A398}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06CDF594-E69F-498D-B776-068F9107A398}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68A5A4FD-5809-47A5-A16A-257C130C5A0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68A5A4FD-5809-47A5-A16A-257C130C5A0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68A5A4FD-5809-47A5-A16A-257C130C5A0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68A5A4FD-5809-47A5-A16A-257C130C5A0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
