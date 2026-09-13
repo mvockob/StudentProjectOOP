@@ -1,0 +1,196 @@
+@startuml GameSystem Class Diagram (refactored)
+' Діаграма класів GameSystem після рефактора за ТЗ:
+'  a) класи розділено за відповідальністю (SRP)
+'  b) інкапсуляція через модифікатори доступу
+'  c) сторонній функціонал винесено в Inventory / CombatResolver / Ability / IGameLogger
+'  d) Game керує ходом гри
+' Ролі українською - у нотатках біля кожного класу.
+' Перегляд: VS Code + PlantUML, https://www.plantuml.com/plantuml/uml/ або plantuml *.puml
+
+title GameSystem - діаграма класів (після рефактора)
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam nodesep 90
+skinparam ranksep 70
+skinparam shadowing false
+skinparam noteBackgroundColor #FEFCE8
+skinparam noteBorderColor #A16207
+top to bottom direction
+
+package "GameSystem" {
+
+    class Game {
+        - _characters : List<Character>
+        - _logger : IGameLogger
+        --
+        + Characters : IReadOnlyList<Character> <<get>>
+        --
+        + Game(logger : IGameLogger?)
+        + CreateCharacter(name : string, maxHealth : int, baseArmor : int, baseAttack : int) : Character
+        + AddCharacter(character : Character) : void
+        + Equip(character : Character, equipment : Equipment) : void
+        + Defend(character : Character) : void
+        + Attack(attacker : Character, target : Character) : int
+        + Heal(character : Character, amount : int) : void
+        + UseAbility(user : Character, ability : IAbility, target : Character) : int
+        + UseAbility(user : Character, abilityName : string, target : Character) : int
+        + RunDemoScenario() : void
+        - AnnounceDefeatIfNeeded(character : Character) : void
+    }
+
+    class Character {
+        + Name : string <<get>>
+        + Health : int <<get, private set>>
+        + MaxHealth : int <<get>>
+        + BaseArmor : int <<get>>
+        + BaseAttack : int <<get>>
+        + IsDefending : bool <<get, private set>>
+        + IsDefeated : bool <<get>>
+        + Inventory : Inventory <<get>>
+        --
+        + TotalArmor : int <<computed>>
+        + TotalAttack : int <<computed>>
+        --
+        + Character(name : string, maxHealth : int, baseArmor : int, baseAttack : int)
+        + Equip(item : Equipment) : void
+        + Attack(target : Character) : int
+        + Heal(amount : int) : void
+        + Defend() : void
+        + UseAbility(ability : IAbility, target : Character) : int
+        + UseAbility(abilityName : string, target : Character) : int
+        ~ TakeDamage(damage : int) : void
+    }
+
+    class Inventory {
+        - _items : List<Equipment>
+        --
+        + Items : IReadOnlyList<Equipment> <<get>>
+        + Count : int <<get>>
+        + TotalAttackBonus : int <<get>>
+        + TotalArmorBonus : int <<get>>
+        --
+        + Add(item : Equipment) : void
+        + Remove(item : Equipment) : bool
+    }
+
+    class Equipment {
+        + Name : string <<get>>
+        + AttackBonus : int <<get>>
+        + ArmorBonus : int <<get>>
+        --
+        + Equipment(name : string, attackBonus : int, armorBonus : int)
+    }
+
+    interface IAbility {
+        + Name : string <<get>>
+        + DamageMultiplier : int <<get>>
+        + Use(user : Character, target : Character) : int
+    }
+
+    class Ability {
+        + Name : string <<get>>
+        + DamageMultiplier : int <<get>>
+        --
+        + Ability(name : string, damageMultiplier : int = 2)
+        + Use(user : Character, target : Character) : int
+    }
+
+    class CombatResolver <<static>> {
+        + DefendArmorBonus : int = 5
+        + DefaultAbilityMultiplier : int = 2
+        --
+        + CalculateDamage(attackerTotalAttack : int, targetTotalArmor : int) : int
+        + CalculateAbilityDamage(attackerTotalAttack : int, multiplier : int) : int
+    }
+
+    interface IGameLogger {
+        + Log(message : string) : void
+        + LogLine(message : string?) : void
+    }
+
+    class ConsoleGameLogger {
+        + Log(message : string) : void
+        + LogLine(message : string?) : void
+    }
+}
+
+' --- Взаємодії ---
+
+Game "1" o-- "0..*" Character : керує ростером >
+Game --> IGameLogger : логує через >
+Character *-- Inventory : створює і володіє >
+Inventory "1" o-- "0..*" Equipment : зберігає >
+Character ..> CombatResolver : розрахунок шкоди >
+Character ..> IAbility : UseAbility >
+' (Залежність Game -> IAbility не малюємо стрілкою: вона вже видна
+'  в сигнатурі UseAbility(user, ability, target); окрема лінія
+'  перетинала всю діаграму.)
+Ability ..> CombatResolver : формула шкоди >
+Ability ..> Character : TakeDamage (internal) >
+IAbility <|.. Ability
+IGameLogger <|.. ConsoleGameLogger
+
+' --- Ролі (за ТЗ: пояснення для кожного об'єкта) ---
+
+note right of Game
+  <b>Game - менеджер гри (d)</b>
+  Тримає ростер персонажів,
+  виконує ходи та ВЕСЬ вивід.
+  Program викликає лише
+  RunDemoScenario().
+end note
+
+note right of Character
+  <b>Character - сутність (a, b)</b>
+  Тільки стан і дії персонажа.
+  Без Console: повертає шкоду,
+  а друкує Game.
+end note
+
+note right of Inventory
+  <b>Inventory - інвентар (c)</b>
+  Винесено з Character (SRP).
+  Список приховано, назовні -
+  лише IReadOnlyList і суми бонусів.
+end note
+
+note right of Equipment
+  <b>Equipment - предмет (b)</b>
+  Незмінний об'єкт-значення:
+  валідація в конструкторі,
+  далі тільки читання.
+end note
+
+note right of Ability
+  <b>Ability / IAbility (c)</b>
+  Замість рядка "Fireball" -
+  об'єкт з множником шкоди.
+  Нові здібності = нові класи.
+end note
+
+note right of CombatResolver
+  <b>CombatResolver - формули (c)</b>
+  Статичний сервіс без стану:
+  шкода атаки, шкода здібності,
+  бонус захисту (+5) в одному місці.
+end note
+
+note right of ConsoleGameLogger
+  <b>IGameLogger - вивід (c)</b>
+  Логування як окрема
+  відповідальність; реалізація
+  для консолі замінювана.
+end note
+
+legend right
+  |= Позначка |= Значення |
+  | o-- | Агрегація (має, але не володіє) |
+  | *-- | Композиція (створює і володіє) |
+  | ..> | Залежність / використання |
+  | <\|.. | Реалізація інтерфейсу |
+  | + / - / ~ | public / private / internal |
+endlegend
+
+@enduml
